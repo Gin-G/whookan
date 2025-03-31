@@ -1,0 +1,101 @@
+/* assets/css/main.css */
+
+/* Custom Background Styles */
+.login-bg {
+    background: linear-gradient(135deg, #6366F1 0%, #3B82F6 100%);
+}
+
+.profile-header {
+    background: linear-gradient(90deg, #3B82F6 0%, #1E40AF 100%);
+}
+
+/* Skill Tags */
+.skill-tag {
+    background-color: #EBF5FF;
+    color: #1E40AF;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.skill-tag button {
+    margin-left: 0.5rem;
+    color: #3B82F6;
+    transition: color 0.2s;
+}
+
+.skill-tag button:hover {
+    color: #1E40AF;
+}
+
+/* Help Request Card */
+.help-request-card {
+    border: 1px solid #E5E7EB;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: box-shadow 0.2s;
+}
+
+.help-request-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Rank Badges */
+.rank-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.rank-badge-newcomer {
+    background-color: #E0E7FF;
+    color: #4338CA;
+}
+
+.rank-badge-helper {
+    background-color: #D1FAE5;
+    color: #065F46;
+}
+
+.rank-badge-skilled {
+    background-color: #FEF3C7;
+    color: #92400E;
+}
+
+.rank-badge-expert {
+    background-color: #FEE2E2;
+    color: #B91C1C;
+}
+
+.rank-badge-master {
+    background-color: #E0E7FF;
+    color: #1E40AF;
+    border: 1px solid #3B82F6;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Responsiveness */
+@media (max-width: 640px) {
+    .profile-header {
+        padding: 1rem;
+    }
+    
+    .profile-header h1 {
+        font-size: 1.5rem;
+    }
+}

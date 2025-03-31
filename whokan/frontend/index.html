@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhoKan - Skill Discovery Platform</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.10.3/cdn.min.js" defer></script>
+    <style>
+        .login-bg {
+            background: linear-gradient(135deg, #6366F1 0%, #3B82F6 100%);
+        }
+        .profile-header {
+            background: linear-gradient(90deg, #3B82F6 0%, #1E40AF 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <div x-data="appState()" x-init="checkAuth()">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-md" x-show="isAuthenticated">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex">
+                        <div class="flex-shrink-0 flex items-center">
+                            <img src="./assets/whokan-logo.png" alt="WhoKan Logo" class="h-8 w-auto mr-2">
+                            <span class="text-blue-600 text-xl font-bold">WhoKan</span>
+                        </div>
+                        <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                            <a href="#" @click.prevent="page = 'dashboard'" 
+                               :class="{'border-indigo-500 text-gray-900': page === 'dashboard', 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700': page !== 'dashboard'}"
+                               class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                Dashboard
+                            </a>
+                            <a href="#" @click.prevent="page = 'profile'" 
+                               :class="{'border-indigo-500 text-gray-900': page === 'profile', 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700': page !== 'profile'}"
+                               class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                My Profile
+                            </a>
+                            <a href="#" @click.prevent="page = 'discover'" 
+                               :class="{'border-indigo-500 text-gray-900': page === 'discover', 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700': page !== 'discover'}"
+                               class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                Discover Skills
+                            </a>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <button @click="logout()" 
+                                class="bg-gray-100 p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Login Page -->
+        <div x-show="page === 'login'" class="min-h-screen flex items-center justify-center login-bg py-12 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
+                <div class="flex justify-center">
+                    <img src="./assets/whokan-logo.png" alt="WhoKan Logo" class="h-16 w-auto">
+                </div>
+                <div>
+                    <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Welcome to WhoKan</h2>
+                    <p class="mt-2 text-center text-sm text-gray-600">
+                        Discover the skills you need, share what you know
+                    </p>
+                </div>
+                <form class="mt-8 space-y-6" @submit.prevent="login()">
+                    <div class="rounded-md shadow-sm -space-y-px">
+                        <div>
+                            <label for="email-address" class="sr-only">Email address</label>
+                            <input id="email-address" name="email" type="email" autocomplete="email" required x-model="loginForm.email"
+                                   class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
+                                   placeholder="Email address">
+                        </div>
+                        <div>
+                            <label for="password" class="sr-only">Password</label>
+                            <input id="password" name="password" type="password" autocomplete="current-password" required x-model="loginForm.password"
+                                   class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
+                                   placeholder="Password">
+                        </div>
+                    </div>
+
+                    <div x-show="errorMessage" class="bg-red-50 border-l-4 border-red-400 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-red-700" x-text="errorMessage"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <input id="remember-me" name="remember-me" type="checkbox" 
+                                   class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                            <label for="remember-me" class="ml-2 block text-sm text-gray-900">
+                                Remember me
+                            </label>
+                        </div>
+
+                        <div class="text-sm">
+                            <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
+                                Forgot your password?
+                            </a>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button type="submit" 
+                                class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Sign in
+                        </button>
+                    </div>
+                    
+                    <div class="text-center">
+                        <span class="text-sm">Don't have an account? </span>
+                        <a href="#" @click.prevent="page = 'register'" class="font-medium text-indigo-600 hover:text-indigo-500">Register now</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Register Page -->
+        <div x-show="page === 'register'" class="min-h-screen flex items-center justify-center login-bg py-12 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
+                <div class="flex justify-center">
+                    <img src="./assets/whokan-logo.png" alt="WhoKan Logo" class="h-16 w-auto">
+                </div>
+                <div>
+                    <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Create an Account</h2>
+                    <p class="mt-2 text-center text-sm text-gray-600">
+                        Join WhoKan and start sharing your skills
+                    </p>
+                </div>
+                <form class="mt-8 space-y-6" @submit.prevent="register()">
+                    <div class="space-y-4">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                            <input id="name" name="name" type="text" required x-model="registerForm.name"
+                                   class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
+                                   placeholder="Your name">
+                        </div>
+                        <div>
+                            <label for="reg-email" class="block text-sm font-medium text-gray-700">Email address</label>
+                            <input id="reg-email" name="email" type="email" autocomplete="email" required x-model="registerForm.email"
+                                   class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
+                                   placeholder="Email address">
+                        </div>
+                        <div>
+                            <label for="reg-password" class="block text-sm font-medium text-gray-700">Password</label>
+                            <input id="reg-password" name="password" type="password" required x-model="registerForm.password"
+                                   class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
+                                   placeholder="Password">
+                        </div>
+                        <div>
+                            <label for="title" class="block text-sm font-medium text-gray-700">Job Title</label>
+                            <input id="title" name="title" type="text" x-model="registerForm.title"
+                                   class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
+                                   placeholder="Your job title">
+                        </div>
+                        <div>
+                            <label for="company" class="block text-sm font-medium text-gray-700">Company</label>
+                            <input id="company" name="company" type="text" x-model="registerForm.company"
+                                   class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
+                                   placeholder="Your company">
+                        </div>
+                    </div>
+
+                    <div x-show="errorMessage" class="bg-red-50 border-l-4 border-red-400 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-red-700" x-text="errorMessage"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button type="submit" 
+                                class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Register
+                        </button>
+                    </div>
+                    
+                    <div class="text-center">
+                        <span class="text-sm">Already have an account? </span>
+                        <a href="#" @click.prevent="page = 'login'" class="font-medium text-indigo-600 hover:text-indigo-500">Sign in</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div x-show="page === 'dashboard' && isAuthenticated" class="min-h-screen bg-gray-50">
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+                    <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Welcome back, <span x-text="currentUser.name"></span>!</h3>
+                            <p class="mt-1 max-w-2xl text-sm text-gray-500">Here's your skill activity dashboard</p>
+                        </div>
+                        <button @click="page = 'profile'" 
+                                class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Edit Profile
+                        </button>
+                    </div>
+                    <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+                        <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                            <div class="bg-blue-50 overflow-hidden shadow rounded-lg">
+                                <div class="px-4 py-5 sm:p-6">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">
+                                            Skills Listed
+                                        </dt>
+                                        <dd class="mt-1 text-3xl font-semibold text-gray-900">
+                                            <span x-text="currentUser.skills.length"></span>
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                            <div class="bg-green-50 overflow-hidden shadow rounded-lg">
+                                <div class="px-4 py-5 sm:p-6">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">
+                                            Times Helped Others
+                                        </dt>
+                                        <dd class="mt-1 text-3xl font-semibold text-gray-900">
+                                            <span x-text="currentUser.helped_count"></span>
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                            <div class="bg-purple-50 overflow-hidden shadow rounded-lg">
+                                <div class="px-4 py-5 sm:p-6">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">
+                                            Profile Rank
+                                        </dt>
+                                        <dd class="mt-1 text-3xl font-semibold text-gray-900">
+                                            <span x-text="computeRank(currentUser.helped_count)"></span>
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+                    <div class="px-4 py-5 sm:px-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Help Requests</h3>
+                        <p class="mt-1 max-w-2xl text-sm text-gray-500">Skills people in your organization are looking for</p>
+                    </div>
+                    <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+                        <div x-show="helpRequests.length === 0" class="text-center py-4 text-gray-500">
+                            No open help requests at the moment.
+                        </div>
+                        <ul class="divide-y divide-gray-200">
+                            <template x-for="request in helpRequests" :key="request.id">
+                                <li class="py-4 flex">
+                                    <div class="ml-3 flex-1">
+                                        <p class="text-sm font-medium text-gray-900" x-text="getSkillNameById(request.skill_id)"></p>
+                                        <p class="text-sm text-gray-500" x-text="request.description"></p>
+                                        <p class="text-sm text-gray-500">Requested by <span x-text="getUserNameById(request.requester_id)"></span></p>
+                                    </div>
+                                    <div class="ml-auto">
+                                        <button @click="offerHelp(request.id)" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                            I can help
+                                        </button>
+                                    </div>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Profile Page -->
+        <div x-show="page === 'profile' && isAuthenticated" class="min-h-screen bg-gray-50">
+            <div class="profile-header text-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                    <h1 class="text-3xl font-bold">My Profile</h1>
+                    <p class="mt-2">Manage your skills and information</p>
+                </div>
+            </div>
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+                    <div class="px-4 py-5 sm:px-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Personal Information</h3>
+                        <p class="mt-1 max-w-2xl text-sm text-gray-500">Edit your profile details</p>
+                    </div>
+                    <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+                        <div class="grid grid-cols-6 gap-6">
+                            <div class="col-span-6 sm:col-span-3">
+                                <label for="full-name" class="block text-sm font-medium text-gray-700">Full name</label>
+                                <input type="text" name="full-name" id="full-name" x-model="profileForm.name" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            </div>
+
+                            <div class="col-span-6 sm:col-span-3">
+                                <label for="job-title" class="block text-sm font-medium text-gray-700">Job title</label>
+                                <input type="text" name="job-title" id="job-title" x-model="profileForm.title" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            </div>
+
+                            <div class="col-span-6 sm:col-span-3">
+                                <label for="company" class="block text-sm font-medium text-gray-700">Company</label>
+                                <input type="text" name="company" id="company" x-model="profileForm.company" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            </div>
+
+                            <div class="col-span-6 sm:col-span-3">
+                                <label for="email-address" class="block text-sm font-medium text-gray-700">Email address</label>
+                                <input type="text" name="email-address" id="email-address" x-model="currentUser.email" disabled class="mt-1 bg-gray-100 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            </div>
+                        </div>
+                        <div class="mt-6">
+                            <button @click="updateProfile()" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                    <div class="px-4 py-5 sm:px-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">My Skills</h3>
+                        <p class="mt-1 max-w-2xl text-sm text-gray-500">Add and manage your skills</p>
+                    </div>
+                    <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+                        <div class="flex space-x-2">
+                            <input type="text" x-model="skillForm.name" placeholder="Add a new skill" class="flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            <button @click="addSkill()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Add
+                            </button>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <template x-if="successMessage">
+                                <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-4">
+                                    <div class="flex">
+                                        <div class="flex-shrink-0">
+                                            <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm text-green-700" x-text="successMessage"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            <h4 class="text-sm font-medium text-gray-500 mb-3">Current Skills:</h4>
+                            <div class="flex flex-wrap gap-2">
+                                <template x-for="(skill, index) in currentUser.skills" :key="skill.id">
+                                    <div class="bg-blue-100 px-3 py-1 rounded-full flex items-center">
+                                        <span class="text-blue-800 text-sm" x-text="skill.name"></span>
+                                        <button @click="removeSkill(skill.id)" class="ml-2 text-blue-500 hover:text-blue-700">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Discover Skills Page -->
+        <div x-show="page === 'discover' && isAuthenticated" class="min-h-screen bg-gray-50">
+            <div class="profile-header text-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                    <h1 class="text-3xl font-bold">Discover Skills</h1>
+                    <p class="mt-2">Find colleagues with the skills you need</p>
+                </div>
+            </div>
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+                    <div class="px-4 py-5 sm:px-6">
+                        <div class="mt-1 flex rounded-md shadow-sm">
+                            <input type="text" x-model="searchTerm" placeholder="Search for a skill..." class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-gray-300">
+                            <button @click="searchUsers()" class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 bg-gray-50 rounded-r-md text-gray-500 sm:text-sm">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">People with relevant skills</h3>
+                        
+                        <div x-show="!searchPerformed" class="text-center py-4 text-gray-500">
+                            Search for a skill to find people who can help.
+                        </div>
+                        
+                        <div x-show="searchPerformed && searchResults.length === 0" class="text-center py-4 text-gray-500">
+                            No users found with the requested skills.
+                        </div>
+                        
+                        <ul class="divide-y divide-gray-200">
+                            <template x-for="user in searchResults" :key="user.id">
+                                <li class="py-4 flex">
+                                    <div class="w-12 h-12 flex-shrink-0">
+                                        <img class="h-12 w-12 rounded-full" src="/api/placeholder/100/100" alt="User avatar">
+                                    </div>
+                                    <div class="ml-4 flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <h4 class="text-sm font-medium text-gray-900" x-text="user.name"></h4>
+                                            <span class="text-sm text-green-600 font-medium">Helped <span x-text="user.helped_count"></span> people</span>
+                                        </div>
+                                        <p class="text-sm text-gray-500" x-text="user.title + ' · ' + user.company"></p>
+                                        <div class="mt-2 flex flex-wrap gap-1">
+                                            <template x-for="skill in user.skills" :key="skill.id">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" x-text="skill.name">
+                                                </span>
+                                            </template>
+                                        </div>
+                                    </div>
+                                    <div class="ml-2">
+                                        <button @click="requestHelp(user.id)" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                            Request Help
+                                        </button>
+                                    </div>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        function appState() {
+            return {
+                // Variables
+                page: 'login',
+                isAuthenticated: false,
+                currentUser: null,
+                helpRequests: [],
+                usersCache: {},
+                skillsCache: {},
+                searchTerm: '',
+                searchResults: [],
+                searchPerformed: false,
+                apiUrl: 'http://localhost:8000',
+                errorMessage: '',
+                successMessage: '',
+                
+                // Forms
+                loginForm: {
+                    email: '',
+                    password: ''
+                },
+                registerForm: {
+                    name: '',
+                    email: '',
+                    password: '',
+                    title: '',
+                    company: ''
+                },
+                profileForm: {
+                    name: '',
+                    title: '',
+                    company: ''
+                },
+                skillForm: {
+                    name: '',
+                    description: ''
+                },
+                
+                // Check if user is already authenticated
+                checkAuth() {
+                    const token = localStorage.getItem('token');
+                    if (token) {
+                        this.isAuthenticated = true;
+                        this.fetchCurrentUser();
+                        this.fetchHelpRequests();
+                        this.page = 'dashboard';
+                    }
+                },
+                
+                // Authentication methods
+                async login() {
+                    try {
+                        this.errorMessage = '';
+                        
+                        // Create form data for token endpoint
+                        const formData = new FormData();
+                        formData.append('username', this.loginForm.email);
+                        formData.append('password', this.loginForm.password);
+                        
+                        const response = await fetch(`${this.apiUrl}/token`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        if (!response.ok) {
+                            const error = await response.json();
+                            throw new Error(error.detail || 'Login failed');
+                        }
+                        
+                        const data = await response.json();
+                        localStorage.setItem('token', data.access_token);
+                        
+                        this.isAuthenticated = true;
+                        await this.fetchCurrentUser();
+                        await this.fetchHelpRequests();
+                        this.page = 'dashboard';
+                    } catch (error) {
+                        this.errorMessage = error.message;
+                    }
+                },
+                
+                async register() {
+                    try {
+                        this.errorMessage = '';
+                        
+                        const response = await fetch(`${this.apiUrl}/users/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                name: this.registerForm.name,
+                                email: this.registerForm.email,
+                                password: this.registerForm.password,
+                                title: this.registerForm.title,
+                                company: this.registerForm.company
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            const error = await response.json();
+                            throw new Error(error.detail || 'Registration failed');
+                        }
+                        
+                        this.page = 'login';
+                        this.successMessage = 'Registration successful! Please login.';
+                        
+                        // Reset form
+                        this.registerForm = {
+                            name: '',
+                            email: '',
+                            password: '',
+                            title: '',
+                            company: ''
+                        };
+                    } catch (error) {
+                        this.errorMessage = error.message;
+                    }
+                },
+                
+                logout() {
+                    localStorage.removeItem('token');
+                    this.isAuthenticated = false;
+                    this.currentUser = null;
+                    this.page = 'login';
+                },
+                
+                // User profile methods
+                async fetchCurrentUser() {
+                    try {
+                        const token = localStorage.getItem('token');
+                        const response = await fetch(`${this.apiUrl}/users/me`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch user profile');
+                        }
+                        
+                        this.currentUser = await response.json();
+                        
+                        // Initialize profile form
+                        this.profileForm = {
+                            name: this.currentUser.name,
+                            title: this.currentUser.title || '',
+                            company: this.currentUser.company || ''
+                        };
+                    } catch (error) {
+                        console.error(error);
+                        this.logout();
+                    }
+                },
+                
+                async updateProfile() {
+                    try {
+                        this.errorMessage = '';
+                        this.successMessage = '';
+                        
+                        const token = localStorage.getItem('token');
+                        const response = await fetch(`${this.apiUrl}/users/me`, {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(this.profileForm)
+                        });
+                        
+                        if (!response.ok) {
+                            const error = await response.json();
+                            throw new Error(error.detail || 'Failed to update profile');
+                        }
+                        
+                        this.currentUser = await response.json();
+                        this.successMessage = 'Profile updated successfully!';
+                        
+                        // Clear message after a few seconds
+                        setTimeout(() => {
+                            this.successMessage = '';
+                        }, 3000);
+                    } catch (error) {
+                        this.errorMessage = error.message;
+                    }
+                },
+                
+                // Skill management methods
+                async addSkill() {
+                    try {
+                        if (!this.skillForm.name.trim()) {
+                            return;
+                        }
+                        
+                        this.errorMessage = '';
+                        this.successMessage = '';
+                        
+                        const token = localStorage.getItem('token');
+                        const response = await fetch(`${this.apiUrl}/users/me/skills`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                name: this.skillForm.name,
+                                description: this.skillForm.description || ''
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            const error = await response.json();
+                            throw new Error(error.detail || 'Failed to add skill');
+                        }
+                        
+                        this.currentUser = await response.json();
+                        this.successMessage = 'Skill added successfully!';
+                        this.skillForm.name = '';
+                        this.skillForm.description = '';
+                        
+                        // Clear message after a few seconds
+                        setTimeout(() => {
+                            this.successMessage = '';
+                        }, 3000);
+                    } catch (error) {
+                        this.errorMessage = error.message;
+                    }
+                },
+                
+                async removeSkill(skillId) {
+                    try {
+                        this.errorMessage = '';
+                        
+                        const token = localStorage.getItem('token');
+                        const response = await fetch(`${this.apiUrl}/users/me/skills/${skillId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            const error = await response.json();
+                            throw new Error(error.detail || 'Failed to remove skill');
+                        }
+                        
+                        this.currentUser = await response.json();
+                        this.successMessage = 'Skill removed successfully!';
+                        
+                        // Clear message after a few seconds
+                        setTimeout(() => {
+                            this.successMessage = '';
+                        }, 3000);
+                    } catch (error) {
+                        this.errorMessage = error.message;
+                    }
+                },
+                
+                // Help request methods
+                async fetchHelpRequests() {
+                    try {
+                        const token = localStorage.getItem('token');
+                        const response = await fetch(`${this.apiUrl}/help-requests/`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch help requests');
+                        }
+                        
+                        this.helpRequests = await response.json();
+                        
+                        // Fetch user details for each request
+                        this.helpRequests.forEach(request => {
+                            this.fetchUserInfo(request.requester_id);
+                        });
+                    } catch (error) {
+                        console.error(error);
+                    }
+                },
+                
+                async requestHelp(userId) {
+                    // To be implemented: show dialog for skill selection and description
+                    alert('Help request feature will be implemented soon!');
+                },
+                
+                async offerHelp(requestId) {
+                    // To be implemented: confirm help offer
+                    alert('Help offer feature will be implemented soon!');
+                },
+                
+                // User search methods
+                async searchUsers() {
+                    try {
+                        if (!this.searchTerm.trim()) {
+                            return;
+                        }
+                        
+                        this.errorMessage = '';
+                        
+                        const token = localStorage.getItem('token');
+                        const response = await fetch(`${this.apiUrl}/users/?skill=${encodeURIComponent(this.searchTerm)}`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            const error = await response.json();
+                            throw new Error(error.detail || 'Search failed');
+                        }
+                        
+                        this.searchResults = await response.json();
+                        this.searchPerformed = true;
+                    } catch (error) {
+                        this.errorMessage = error.message;
+                    }
+                },
+                
+                // Utility methods
+                async fetchUserInfo(userId) {
+                    if (this.usersCache[userId]) {
+                        return;
+                    }
+                    
+                    try {
+                        const token = localStorage.getItem('token');
+                        const response = await fetch(`${this.apiUrl}/users/${userId}`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch user info');
+                        }
+                        
+                        const userData = await response.json();
+                        this.usersCache[userId] = userData;
+                    } catch (error) {
+                        console.error(error);
+                    }
+                },
+                
+                getUserNameById(userId) {
+                    return this.usersCache[userId]?.name || 'Unknown User';
+                },
+                
+                getSkillNameById(skillId) {
+                    if (this.skillsCache[skillId]) {
+                        return this.skillsCache[skillId].name;
+                    }
+                    
+                    // Look through all users' skills
+                    for (const user of Object.values(this.usersCache)) {
+                        for (const skill of user.skills) {
+                            if (skill.id === skillId) {
+                                this.skillsCache[skillId] = skill;
+                                return skill.name;
+                            }
+                        }
+                    }
+                    
+                    return 'Unknown Skill';
+                },
+                
+                computeRank(helpCount) {
+                    if (helpCount === 0) return 'Newcomer';
+                    if (helpCount < 5) return 'Helper';
+                    if (helpCount < 10) return 'Skilled';
+                    if (helpCount < 20) return 'Expert';
+                    return 'Master';
+                }
+            };
+        }
+    </script>
+</body>
+</html>

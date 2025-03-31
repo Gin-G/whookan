@@ -1,0 +1,192 @@
+# WhoKan - Skill Discovery Platform
+
+WhoKan is a platform that helps organizations discover and leverage internal expertise. Users can list their skills, search for colleagues with specific skills, request help, and track help provided.
+
+## Features
+
+- User authentication and profile management
+- Skill listing and management
+- Skill discovery and search
+- Help request system
+- Help tracking and confirmation
+- Profile ranking based on help provided
+
+## Project Structure
+
+
+```
+whokan/
+├── backend/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── main.py
+│   │   ├── config.py
+│   │   ├── deps.py
+│   │   ├── models/
+│   │   │   ├── __init__.py
+│   │   │   ├── user.py
+│   │   │   ├── skill.py
+│   │   │   └── help_request.py
+│   │   ├── schemas/
+│   │   │   ├── __init__.py
+│   │   │   ├── user.py
+│   │   │   ├── skill.py
+│   │   │   ├── help_request.py
+│   │   │   └── token.py
+│   │   ├── api/
+│   │   │   ├── __init__.py
+│   │   │   ├── endpoints/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── auth.py
+│   │   │   │   ├── users.py
+│   │   │   │   ├── skills.py
+│   │   │   │   └── help_requests.py
+│   │   │   └── api.py
+│   │   ├── db/
+│   │   │   ├── __init__.py
+│   │   │   └── session.py
+│   │   └── core/
+│   │       ├── __init__.py
+│   │       ├── security.py
+│   │       └── config.py
+│   ├── requirements.txt
+│   └── README.md
+│
+├── frontend/
+│   ├── index.html
+│   ├── assets/
+│   │   ├── css/
+│   │   │   └── main.css
+│   │   ├── js/
+│   │   │   ├── app.js
+│   │   │   ├── auth.js
+│   │   │   ├── profile.js
+│   │   │   ├── skills.js
+│   │   │   ├── search.js
+│   │   │   ├── help-requests.js
+│   │   │   └── api.js
+│   │   └── img/
+│   │       └── whokan-logo.png
+│   ├── components/
+│   │   ├── navbar.html
+│   │   ├── footer.html
+│   │   ├── login-form.html
+│   │   ├── register-form.html
+│   │   ├── profile-form.html
+│   │   ├── skills-form.html
+│   │   └── search-form.html
+│   └── pages/
+│       ├── login.html
+│       ├── register.html
+│       ├── dashboard.html
+│       ├── profile.html
+│       └── discover.html
+│
+└── README.md
+```
+
+## Backend Setup
+
+### Prerequisites
+
+- Python 3.8+
+- FastAPI
+- Uvicorn
+- JWT
+- Passlib
+- Pydantic
+- Email-validator
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/whokan.git
+   cd whokan
+   ```
+
+2. Create a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows, use: venv\Scripts\activate
+   ```
+
+3. Install dependencies:
+   ```bash
+   pip install fastapi uvicorn pyjwt passlib[bcrypt] pydantic email-validator
+   ```
+
+4. Run the FastAPI backend:
+   ```bash
+   cd backend
+   uvicorn main:app --reload
+   ```
+
+The backend will be running at `http://localhost:8000`. You can access the API documentation at `http://localhost:8000/docs`.
+
+## Frontend Setup
+
+The frontend is a simple HTML/JS application using Alpine.js and Tailwind CSS, both loaded via CDN. 
+
+1. Open the `frontend/index.html` file in a web browser.
+2. Make sure the `apiUrl` in the JavaScript section matches your backend URL (default is `http://localhost:8000`).
+
+For a development environment, you can use a simple HTTP server:
+
+```bash
+# Using Python
+cd frontend
+python -m http.server 8080
+```
+
+Then access the application at `http://localhost:8080`.
+
+## Usage
+
+### Authentication
+
+1. Register a new account using the registration form.
+2. Log in with your email and password.
+
+### Managing Skills
+
+1. Go to the "My Profile" page.
+2. Add skills by typing in the skill name and clicking "Add".
+3. Remove skills by clicking the 'X' button next to each skill.
+
+### Searching for Skills
+
+1. Go to the "Discover Skills" page.
+2. Enter a skill name in the search box and click "Search".
+3. Browse users with matching skills.
+4. Request help from users by clicking the "Request Help" button.
+
+### Helping Others
+
+1. On the dashboard, view open help requests.
+2. Offer help by clicking the "I can help" button.
+3. Each time you help someone, your help count increases and your rank improves.
+
+## Security Considerations
+
+- The current implementation uses a hardcoded secret key for JWT tokens. For production, use a secure, randomly generated key stored in environment variables.
+- The backend uses an in-memory database. For production, replace with a real database like PostgreSQL.
+- CORS is configured to allow all origins for development. For production, restrict to specific origins.
+
+## Future Enhancements
+
+1. **Real Database Integration**: Replace the in-memory storage with a real database like PostgreSQL or MongoDB.
+2. **Blockchain Integration**: Add blockchain features for decentralized skill verification.
+3. **Rich Text Descriptions**: Allow markdown or rich text in skill descriptions.
+4. **Skill Endorsements**: Enable users to endorse others' skills.
+5. **Help Request Categories**: Categorize help requests for better organization.
+6. **Notification System**: Email or in-app notifications for help requests.
+7. **Admin Dashboard**: Add administrative features for organization management.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

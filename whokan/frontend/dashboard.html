@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhoKan - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Navigation -->
+    <include src="components/navbar.html"></include>
+    
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+            <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Welcome back, <span class="current-user-name">User</span>!</h3>
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500">Here's your skill activity dashboard</p>
+                </div>
+                <a href="profile.html" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Edit Profile
+                </a>
+            </div>
+            <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                    <div class="bg-blue-50 overflow-hidden shadow rounded-lg">
+                        <div class="px-4 py-5 sm:p-6">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">
+                                    Skills Listed
+                                </dt>
+                                <dd class="mt-1 text-3xl font-semibold text-gray-900" id="skills-count">
+                                    0
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="bg-green-50 overflow-hidden shadow rounded-lg">
+                        <div class="px-4 py-5 sm:p-6">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">
+                                    Times Helped Others
+                                </dt>
+                                <dd class="mt-1 text-3xl font-semibold text-gray-900" id="helped-count">
+                                    0
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="bg-purple-50 overflow-hidden shadow rounded-lg">
+                        <div class="px-4 py-5 sm:p-6">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">
+                                    Profile Rank
+                                </dt>
+                                <dd class="mt-1 text-3xl font-semibold text-gray-900" id="user-rank">
+                                    Newcomer
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+            <div class="px-4 py-5 sm:px-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Help Requests</h3>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">Skills people in your organization are looking for</p>
+            </div>
+            <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+                <div id="help-requests-loading" class="text-center py-4">
+                    <svg class="animate-spin h-6 w-6 text-gray-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="text-gray-500 mt-2">Loading help requests...</p>
+                </div>
+                
+                <div id="no-help-requests" class="hidden text-center py-4 text-gray-500">
+                    No open help requests at the moment.
+                </div>
+                
+                <ul id="help-requests-list" class="divide-y divide-gray-200">
+                    <!-- Help requests will be loaded here -->
+                </ul>
+            </div>
+        </div>
+
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">My Skills</h3>
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500">Skills you've added to your profile</p>
+                </div>
+                <a href="profile.html" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Manage Skills
+                </a>
+            </div>
+            <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+                <div id="skills-loading" class="text-center py-4">
+                    <svg class="animate-spin h-6 w-6 text-gray-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="text-gray-500 mt-2">Loading skills...</p>
+                </div>
+                
+                <div id="dashboard-skills-list" class="flex flex-wrap gap-2">
+                    <!-- Skills will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+</body>
+</html>
