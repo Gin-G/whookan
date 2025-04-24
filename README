@@ -113,7 +113,7 @@ whokan/
 
 3. Install dependencies:
    ```bash
-   pip install fastapi uvicorn pyjwt passlib[bcrypt] pydantic email-validator
+   pip install -r requirements.txt
    ```
 
 4. Run the FastAPI backend:
