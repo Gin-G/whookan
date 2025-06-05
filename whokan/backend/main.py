@@ -1,10 +1,15 @@
 # app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import time
+import asyncio
+from sqlalchemy.exc import OperationalError
 
 from app.api.api import api_router
 from app.core.config import settings
 from app.db.session import add_example_data
+from app.db.database import engine
+from app.db.models import Base
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -23,12 +28,37 @@ if settings.BACKEND_CORS_ORIGINS:
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
+async def wait_for_db():
+    """Wait for database to be ready"""
+    max_retries = 30
+    retry_count = 0
+    
+    while retry_count < max_retries:
+        try:
+            # Try to connect to database
+            connection = engine.connect()
+            connection.close()
+            print("Database connection successful!")
+            return True
+        except OperationalError:
+            retry_count += 1
+            print(f"Database not ready, retrying... ({retry_count}/{max_retries})")
+            await asyncio.sleep(2)
+    
+    raise Exception("Could not connect to database after maximum retries")
 
 @app.on_event("startup")
 async def startup_event():
+    # Wait for database to be ready
+    await wait_for_db()
+    
+    # Create tables
+    Base.metadata.create_all(bind=engine)
+    print("Database tables created!")
+    
+    # Add example data
     add_example_data()
 
-
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to WhoKan API"}
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}

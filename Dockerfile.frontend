@@ -20,7 +20,7 @@ WORKDIR /app/whookan/whokan
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Set the working directory to the frontend directory
-WORKDIR /app/whookan/whookan/frontend
+WORKDIR /app/whookan/whokan/frontend
 
 # Expose the port that the app runs on
 EXPOSE 8080
