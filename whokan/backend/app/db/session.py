@@ -1,9 +1,9 @@
 from typing import Optional, List
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
-from app.db.database import SessionLocal
-from app.db.models import User, Skill, HelpRequest
-from app.core.security import get_password_hash
+from db.database import SessionLocal
+from db.models import User, Skill, HelpRequest
+from core.security import get_password_hash
 
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
     """

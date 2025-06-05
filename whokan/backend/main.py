@@ -1,15 +1,15 @@
-# app/main.py
+# main.py (in backend directory)
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import time
 import asyncio
 from sqlalchemy.exc import OperationalError
 
-from app.api.api import api_router
-from app.core.config import settings
-from app.db.session import add_example_data
-from app.db.database import engine
-from app.db.models import Base
+from api.api import api_router
+from core.config import settings
+from db.session import add_example_data
+from db.database import engine
+from db.models import Base
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
