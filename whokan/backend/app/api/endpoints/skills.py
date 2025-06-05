@@ -3,9 +3,10 @@ from typing import Any, List
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
-from app.deps import get_current_user
-from app.db.session import skills_db, users_db
+from app.deps import get_current_user, get_db
+from app.db.session import get_or_create_skill, add_skill_to_user
 from app.models.user import User
 from app.models.skill import Skill as SkillModel
 from app.schemas.skill import Skill, SkillCreate, BulkSkillImport
@@ -16,28 +17,26 @@ router = APIRouter()
 
 @router.post("", response_model=UserSchema)
 def create_skill(
-    skill_in: SkillCreate, current_user: User = Depends(get_current_user)
+    skill_in: SkillCreate, 
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ) -> Any:
     """
     Create new skill
     """
     # Check if user already has this skill
-    for existing_skill in current_user.skills:
-        if existing_skill.name.lower() == skill_in.name.lower():
-            raise HTTPException(
-                status_code=400,
-                detail="Skill already exists for this user",
-            )
+    existing_skill_names = [skill.name.lower() for skill in current_user.skills]
+    if skill_in.name.lower() in existing_skill_names:
+        raise HTTPException(
+            status_code=400,
+            detail="Skill already exists for this user",
+        )
     
-    skill_id = uuid4()
-    skill = SkillModel(
-        id=skill_id,
-        name=skill_in.name,
-        description=skill_in.description,
-    )
-    skills_db[str(skill_id)] = skill
-    current_user.skills.append(skill)
-    users_db[current_user.email] = current_user
+    # Add skill to user (this will create the skill if it doesn't exist)
+    add_skill_to_user(db, current_user, skill_in.name)
+    
+    # Refresh user to get updated skills
+    db.refresh(current_user)
     
     # Convert model to dict to match Pydantic schema
     return {
@@ -46,14 +45,16 @@ def create_skill(
         "name": current_user.name,
         "title": current_user.title,
         "company": current_user.company,
-        "skills": current_user.skills,
+        "skills": [skill.name for skill in current_user.skills] if current_user.skills else [],
         "helped_count": current_user.helped_count
     }
 
 
 @router.post("/bulk", response_model=UserSchema)
 def create_skills_bulk(
-    bulk_import: BulkSkillImport, current_user: User = Depends(get_current_user)
+    bulk_import: BulkSkillImport, 
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ) -> Any:
     """
     Import multiple skills at once
@@ -81,13 +82,10 @@ def create_skills_bulk(
         if skill_name.lower() in existing_skill_names:
             continue
             
-        skill_id = uuid4()
-        new_skill = SkillModel(id=skill_id, name=skill_name)
-        skills_db[str(skill_id)] = new_skill
-        current_user.skills.append(new_skill)
+        add_skill_to_user(db, current_user, skill_name)
     
-    # Save updated user
-    users_db[current_user.email] = current_user
+    # Refresh user to get updated skills
+    db.refresh(current_user)
     
     # Convert model to dict to match Pydantic schema
     return {
@@ -96,20 +94,37 @@ def create_skills_bulk(
         "name": current_user.name,
         "title": current_user.title,
         "company": current_user.company,
-        "skills": current_user.skills,
+        "skills": [skill.name for skill in current_user.skills] if current_user.skills else [],
         "helped_count": current_user.helped_count
     }
 
 
 @router.delete("/{skill_id}", response_model=UserSchema)
 def delete_skill(
-    skill_id: UUID, current_user: User = Depends(get_current_user)
+    skill_id: UUID, 
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ) -> Any:
     """
-    Delete a skill
+    Delete a skill from current user
     """
-    current_user.skills = [skill for skill in current_user.skills if skill.id != skill_id]
-    users_db[current_user.email] = current_user
+    # Find the skill to remove
+    skill_to_remove = None
+    for skill in current_user.skills:
+        if str(skill.id) == str(skill_id):
+            skill_to_remove = skill
+            break
+    
+    if not skill_to_remove:
+        raise HTTPException(
+            status_code=404,
+            detail="Skill not found for this user"
+        )
+    
+    # Remove skill from user
+    current_user.skills.remove(skill_to_remove)
+    db.commit()
+    db.refresh(current_user)
     
     # Convert model to dict to match Pydantic schema
     return {
@@ -118,6 +133,6 @@ def delete_skill(
         "name": current_user.name,
         "title": current_user.title,
         "company": current_user.company,
-        "skills": current_user.skills,
+        "skills": [skill.name for skill in current_user.skills] if current_user.skills else [],
         "helped_count": current_user.helped_count
     }
