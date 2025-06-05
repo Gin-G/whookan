@@ -44,6 +44,19 @@ services:
       retries: 3
       start_period: 30s
 
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    environment:
+      - BACKEND_URL=http://backend:8000
+      
 volumes:
   postgres_data:
 
