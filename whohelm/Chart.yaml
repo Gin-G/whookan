@@ -1,0 +1,17 @@
+
+apiVersion: v2
+name: whokan
+description: A Helm chart for Whokan application
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - fastapi
+  - python
+  - api
+home: https://github.com/Gin-G/whookan
+sources:
+  - https://github.com/Gin-G/whookan
+maintainers:
+  - name: Gin-G
+    email: NickCo7@gmail.com
