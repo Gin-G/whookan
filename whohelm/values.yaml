@@ -1,4 +1,18 @@
+app:
+  group: whokan
 backend:
   image: ncging/whokan-backend:latest
 frontend:
   image: ncging/whokan-frontend:latest
+db:
+  name: whogres
+  instances: 3
+  size: 10Gi
+  secretPath: whokan
+  app:
+    name: whokan-db
+    owner: whokan
+  superuser:
+    passwordKey: pgsupass
+  appuser:
+    passwordKey: pguserpass
