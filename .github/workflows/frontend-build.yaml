@@ -5,7 +5,7 @@ name: WhoKan Frontend Container Build
 on: 
   push:
     paths:
-      - whokan/Frontend/**
+      - whokan/frontend/**
       - Dockerfile.frontend
 
 jobs:
