@@ -3,7 +3,7 @@ app:
 backend:
   image: ncging/whokan-backend:latest
 frontend:
-  image: ncging/whokan-frontend:latest
+    image: docker.io/ncging/whokan-frontend:2025-06-06.05.47
 db:
   name: whogres
   instances: 3
