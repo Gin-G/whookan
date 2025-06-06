@@ -1,2 +1,4 @@
 backend:
   image: ncging/whokan-backend:latest
+frontend:
+  image: ncging/whokan-frontend:latest
