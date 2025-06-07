@@ -9,7 +9,7 @@ db:
   name: whogres
   instances: 3
   size: 10Gi
-  secretPath: whokan
+  secretPath: data/whokan
   app:
     name: whokan-db
     owner: whokan
