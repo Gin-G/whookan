@@ -1,5 +1,6 @@
 app:
   group: whokan
+  fqdn: whokan.nickknows.net
 backend:
   image: ncging/whokan-backend:latest
 frontend:

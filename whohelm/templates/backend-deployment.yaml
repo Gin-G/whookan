@@ -4,6 +4,7 @@ metadata:
   name: backend
   labels:
     app: backend
+    group: {{ .Values.app.group }}
 spec:
   replicas: 3
   selector:
@@ -16,6 +17,6 @@ spec:
     spec:
       containers:
       - name: backend
-        image: your-registry/whookan-backend:latest
+        image: {{ .Values.backend.image }}
         ports:
         - containerPort: 8000
