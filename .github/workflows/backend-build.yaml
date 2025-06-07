@@ -33,7 +33,7 @@ jobs:
             ncging/whokan-backend:${{ steps.date.outputs.date }}
       - name: Update Helm chart with new image
         run: |
-          sed -i "/whokan-backend/ c\    image: docker.io/ncging/whokan-backend:${{ steps.date.outputs.date }}" whohelm/values.yaml
+          sed -i "/whokan-backend/ c\  image: docker.io/ncging/whokan-backend:${{ steps.date.outputs.date }}" whohelm/values.yaml
       - name: Push changes to GitHub
         run: |
           git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com"
