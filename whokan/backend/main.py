@@ -1,4 +1,3 @@
-# main.py (in backend directory)
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import time
