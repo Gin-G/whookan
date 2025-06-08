@@ -16,4 +16,5 @@ db:
   superuser:
     passwordKey: pgsupass
   appuser:
+    userKey: pguser
     passwordKey: pguserpass
