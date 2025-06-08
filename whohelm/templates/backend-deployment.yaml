@@ -24,4 +24,4 @@ spec:
         - name: SECRET_KEY
           value: "your-secret-key-value"
         - name: POSTGRES_HOST
-            value: "whogres-rw"
+        value: "whogres-rw"
