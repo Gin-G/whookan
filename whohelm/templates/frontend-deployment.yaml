@@ -20,3 +20,6 @@ spec:
         image: {{ .Values.frontend.image }}
         ports:
         - containerPort: 8080
+        env:
+        - name: SECRET_KEY
+          value: "your-secret-key-value"
