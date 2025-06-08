@@ -4,6 +4,7 @@
  * API Service for WhoKan frontend
  * Handles all communication with the backend API
  */
+
 class ApiService {
     constructor(baseUrl = 'http://localhost:8000/api/v1') {
         this.baseUrl = baseUrl;
