@@ -24,4 +24,17 @@ spec:
         - name: SECRET_KEY
           value: "your-secret-key-value"
         - name: POSTGRES_HOST
-          value: "whogres-rw"
+          value: "{{ .Values.db.name }}-rw"
+        - name: POSTGRES_DB
+          value: {{ .Values.db.app.name | quote }}
+        - name: POSTGRES_USER
+          value: {{ .Values.db.app.owner | quote }}
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Values.db.name }}-app-user"
+              key: password
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: ENVIRONMENT
+          value: {{ .Values.environment | default "production" | quote }}
