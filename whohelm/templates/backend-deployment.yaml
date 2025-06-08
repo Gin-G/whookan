@@ -28,7 +28,10 @@ spec:
         - name: POSTGRES_DB
           value: {{ .Values.db.app.name | quote }}
         - name: POSTGRES_USER
-          value: {{ .Values.db.app.owner | quote }}
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Values.db.name }}-app-user"
+              key: username
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
