@@ -34,7 +34,7 @@ class User(Base):
     help_requests_helping = relationship("HelpRequest", foreign_keys="HelpRequest.helper_id", back_populates="helper")
 
 class Skill(Base):
-    __tablename__ = "user_skills"
+    __tablename__ = "skills"
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, unique=True, nullable=False, index=True)

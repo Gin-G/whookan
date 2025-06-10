@@ -4,12 +4,10 @@ import time
 import asyncio
 from sqlalchemy.exc import OperationalError
 
-from app.api.api import api_router
 from app.core.config import settings
-from app.db.session import add_example_data
 from app.db.database import engine
-from app.db.models import Base
 
+# Import api_router last, after database setup
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
@@ -24,8 +22,6 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-
-app.include_router(api_router, prefix=settings.API_V1_STR)
 
 async def wait_for_db():
     """Wait for database to be ready"""
@@ -51,12 +47,20 @@ async def startup_event():
     # Wait for database to be ready
     await wait_for_db()
     
+    # Import models here to ensure they're loaded
+    from app.db.models import Base
+    
     # Create tables
     Base.metadata.create_all(bind=engine)
     print("Database tables created!")
     
     # Add example data
+    from app.db.session import add_example_data
     add_example_data()
+
+# Import and include router after startup event is defined
+from app.api.api import api_router
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/health")
 async def health_check():
