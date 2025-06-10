@@ -2,7 +2,7 @@ app:
   group: whokan
   fqdn: whokan.nickknows.net
 backend:
-  image: docker.io/ncging/whokan-backend:2025-06-07.05.01
+  image: docker.io/ncging/whokan-backend:2025-06-10.04.58
 frontend:
   image: docker.io/ncging/whokan-frontend:2025-06-08.05.31
 db:
