@@ -1,10 +1,10 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: frontend-ingress
+  name: whokan-ingress
   namespace: {{ .Release.Namespace }}
   labels:
-    app: frontend
+    app: whokan
     group: {{ .Values.app.group }}
   annotations:
       nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -19,9 +19,16 @@ spec:
       - {{ .Values.app.fqdn }}
       secretName: whokan-tls
   rules:
-    - host: {{ .Values.app.fqdn }}  # Added missing host field
+    - host: {{ .Values.app.fqdn }}
       http:
         paths:
+        - path: /api
+          pathType: Prefix
+          backend:
+            service:
+              name: backend
+              port:
+                number: 8000
         - path: /
           pathType: Prefix
           backend:
