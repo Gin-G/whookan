@@ -16,7 +16,7 @@ user_skills = Table(
 )
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "app_users"
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String, unique=True, index=True, nullable=False)
@@ -34,7 +34,7 @@ class User(Base):
     help_requests_helping = relationship("HelpRequest", foreign_keys="HelpRequest.helper_id", back_populates="helper")
 
 class Skill(Base):
-    __tablename__ = "skills"
+    __tablename__ = "user_skills"
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, unique=True, nullable=False, index=True)
