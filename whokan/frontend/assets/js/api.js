@@ -6,7 +6,7 @@
  */
 
 class ApiService {
-    constructor(baseUrl = '/api/v1') {  
+    constructor(baseUrl = '/api/v1') {
         this.baseUrl = baseUrl;
         this.token = localStorage.getItem('token');
     }
@@ -45,6 +45,19 @@ class ApiService {
     }
 
     /**
+     * Build full URL ensuring correct protocol
+     * @param {string} endpoint - API endpoint
+     * @returns {string} Full URL with correct protocol
+     */
+    buildUrl(endpoint) {
+        if (this.baseUrl.startsWith('http')) {
+            return `${this.baseUrl}${endpoint}`;
+        }
+        // For relative paths, use current origin (maintains HTTPS)
+        return `${window.location.origin}${this.baseUrl}${endpoint}`;
+    }
+
+    /**
      * Make a request to the API
      * @param {string} endpoint - API endpoint
      * @param {string} method - HTTP method
@@ -52,7 +65,7 @@ class ApiService {
      * @returns {Promise} API response
      */
     async request(endpoint, method = 'GET', data = null) {
-        const url = `${this.baseUrl}${endpoint}`;
+        const url = this.buildUrl(endpoint);
         
         const options = {
             method,
@@ -96,7 +109,8 @@ class ApiService {
         formData.append('username', email);
         formData.append('password', password);
         
-        const response = await fetch(`${this.baseUrl}/auth/login`, {
+        const url = this.buildUrl('/auth/login');
+        const response = await fetch(url, {
             method: 'POST',
             body: formData
         });
