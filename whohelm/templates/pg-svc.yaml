@@ -3,11 +3,11 @@ kind: Service
 metadata:
   name: {{ .Values.db.name }}
   labels:
-    app: {{ .Values.webapp.name }}-pgdb
-    group: {{ .Values.webapp.group }}
+    app: {{ .Values.db.name }}
+    group: {{ .Values.app.group }}
 spec:
   type: ClusterIP
   ports:
     - port: 5432
   selector:
-    app: {{ .Values.webapp.name }}-pgdb
+    app: {{ .Values.db.name }}
