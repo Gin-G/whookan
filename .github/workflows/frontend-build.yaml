@@ -34,6 +34,9 @@ jobs:
       - name: Update Helm chart with new image
         run: |
           sed -i "/whokan-frontend/ c\  image: docker.io/ncging/whokan-frontend:${{ steps.date.outputs.date }}" whohelm/values.yaml
+      - name: Pull latest changes
+        run: |
+          git pull --rebase origin main
       - name: Push changes to GitHub
         run: |
           git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com"
