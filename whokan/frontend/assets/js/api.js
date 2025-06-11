@@ -6,7 +6,7 @@
  */
 
 class ApiService {
-    constructor(baseUrl = 'http://backend:8000/api/v1') {
+    constructor(baseUrl = '/api/v1') {  // Changed to relative path
         this.baseUrl = baseUrl;
         this.token = localStorage.getItem('token');
     }
@@ -50,6 +50,11 @@ class ApiService {
      * @returns {string} Full URL with correct protocol
      */
     buildUrl(endpoint) {
+        // Always use relative paths to inherit the current protocol (HTTPS)
+        if (this.baseUrl.startsWith('/')) {
+            return `${this.baseUrl}${endpoint}`;
+        }
+        // Fallback for absolute URLs
         if (this.baseUrl.startsWith('http')) {
             return `${this.baseUrl}${endpoint}`;
         }
