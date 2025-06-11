@@ -42,4 +42,5 @@ jobs:
           git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com"
           git config --global user.name "$GITHUB_ACTOR"
           git commit -a -m "Image build and push successful, updated Helm chart to use new image"
+          git pull --rebase origin main
           git push
