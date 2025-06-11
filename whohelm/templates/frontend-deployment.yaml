@@ -6,7 +6,7 @@ metadata:
     app: frontend
     group: {{ .Values.app.group }}
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: frontend

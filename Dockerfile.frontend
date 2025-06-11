@@ -23,7 +23,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 WORKDIR /app/whookan/whokan/frontend
 
 # Create startup script
-RUN echo '#!/bin/bash\nsed -i "s|{{API_URL}}|$API_URL|g" *.html *.js\npython -m http.server 8080 --bind 0.0.0.0' > start.sh && chmod +x start.sh
+RUN echo '#!/bin/bash\nsed -i "s|{{API_URL}}|$API_URL|g" index.html assets/js/api.js\npython -m http.server 8080 --bind 0.0.0.0' > start.sh && chmod +x start.sh
 
 EXPOSE 8080
 CMD ["./start.sh"]
