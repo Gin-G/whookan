@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 
 from app.deps import get_current_user, get_db
 from app.db.session import get_or_create_skill, add_skill_to_user
-from app.models.user import User
-from app.models.skill import Skill as SkillModel
+from app.db.models import User
+from app.db.models import Skill as SkillModel
 from app.schemas.skill import Skill, SkillCreate, BulkSkillImport
 from app.schemas.user import User as UserSchema
 

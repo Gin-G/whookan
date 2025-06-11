@@ -8,7 +8,7 @@ from app.core.security import get_password_hash
 from app.deps import get_current_user, get_db
 from app.db.session import create_user, get_users_by_skill, get_user_by_email
 from app.schemas.user import User, UserCreate, UserUpdate
-from app.models.user import User as UserModel
+from app.db.models import User as UserModel
 
 router = APIRouter()
 

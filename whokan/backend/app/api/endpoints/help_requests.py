@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 
 from app.deps import get_current_user, get_db
 from app.db.session import get_user_by_id, get_help_request_by_id
-from app.models.user import User
-from app.models.help_request import HelpRequest as HelpRequestModel
+from app.db.models import User
+from app.db.models import HelpRequest as HelpRequestModel
 from app.schemas.help_request import HelpRequest, HelpRequestCreate, HelpConfirmation
 from app.schemas.user import User as UserSchema
 

@@ -11,7 +11,7 @@ Base = declarative_base()
 user_skills = Table(
     'user_skills',
     Base.metadata,
-    Column('user_id', UUID(as_uuid=True), ForeignKey('users.id'), primary_key=True),
+    Column('user_id', UUID(as_uuid=True), ForeignKey('app_users.id'), primary_key=True),
     Column('skill_id', UUID(as_uuid=True), ForeignKey('skills.id'), primary_key=True)
 )
 
@@ -51,8 +51,8 @@ class HelpRequest(Base):
     description = Column(Text)
     skill_needed = Column(String, nullable=False)
     status = Column(String, default="open")  # open, in_progress, completed, cancelled
-    requester_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
-    helper_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=True)
+    requester_id = Column(UUID(as_uuid=True), ForeignKey('app_users.id'), nullable=False)
+    helper_id = Column(UUID(as_uuid=True), ForeignKey('app_users.id'), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
