@@ -6,7 +6,7 @@
  */
 
 class ApiService {
-    constructor(baseUrl = '/api/v1') {  // Changed to relative path
+    constructor(baseUrl = 'https://whokan.nickknows.net/api/v1') {  // Changed to relative path
         this.baseUrl = baseUrl;
         this.token = localStorage.getItem('token');
     }
