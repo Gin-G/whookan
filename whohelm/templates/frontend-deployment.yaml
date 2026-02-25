@@ -19,6 +19,8 @@ spec:
       - name: frontend
         image: {{ .Values.frontend.image }}
         ports:
+  name: whogres
+  instances: 3
         - containerPort: 8080
         env:
         - name: SECRET_KEY

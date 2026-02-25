@@ -7,7 +7,7 @@ frontend:
   image: docker.io/ncging/whokan-frontend:2025-06-11.05.34
 db:
   name: whogres
-  instances: 3
+  instances: 1
   size: 10Gi
   secretPath: whokan
   app:
