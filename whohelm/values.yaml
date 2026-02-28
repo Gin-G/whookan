@@ -1,6 +1,8 @@
 app:
   group: whokan
   fqdn: whokan.nickknows.net
+  secretKeyPath: whokan
+  secretKeyProperty: secret_key_value
 backend:
   image: docker.io/ncging/whokan-backend:2025-06-11.05.19
 frontend:

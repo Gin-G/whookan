@@ -96,6 +96,6 @@ def confirm_help(
         "name": helper.name,
         "title": helper.title,
         "company": helper.company,
-        "skills": [skill.name for skill in helper.skills] if helper.skills else [],
+        "skills": [{"id": str(skill.id), "name": skill.name} for skill in helper.skills] if helper.skills else [],
         "helped_count": helper.helped_count
     }

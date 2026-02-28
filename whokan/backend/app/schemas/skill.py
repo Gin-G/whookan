@@ -19,6 +19,9 @@ class SkillUpdate(SkillBase):
 class SkillInDB(SkillBase):
     id: UUID
 
+    class Config:
+        orm_mode = True
+
 
 class Skill(SkillInDB):
     pass

@@ -45,7 +45,7 @@ def create_skill(
         "name": current_user.name,
         "title": current_user.title,
         "company": current_user.company,
-        "skills": [skill.name for skill in current_user.skills] if current_user.skills else [],
+        "skills": [{"id": str(skill.id), "name": skill.name} for skill in current_user.skills] if current_user.skills else [],
         "helped_count": current_user.helped_count
     }
 
@@ -94,7 +94,7 @@ def create_skills_bulk(
         "name": current_user.name,
         "title": current_user.title,
         "company": current_user.company,
-        "skills": [skill.name for skill in current_user.skills] if current_user.skills else [],
+        "skills": [{"id": str(skill.id), "name": skill.name} for skill in current_user.skills] if current_user.skills else [],
         "helped_count": current_user.helped_count
     }
 
@@ -133,6 +133,6 @@ def delete_skill(
         "name": current_user.name,
         "title": current_user.title,
         "company": current_user.company,
-        "skills": [skill.name for skill in current_user.skills] if current_user.skills else [],
+        "skills": [{"id": str(skill.id), "name": skill.name} for skill in current_user.skills] if current_user.skills else [],
         "helped_count": current_user.helped_count
     }

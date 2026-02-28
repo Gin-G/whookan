@@ -25,7 +25,7 @@ def read_user_me(current_user: UserModel = Depends(get_current_user)) -> Any:
         "name": current_user.name,
         "title": current_user.title,
         "company": current_user.company,
-        "skills": [skill.name for skill in current_user.skills] if current_user.skills else [],
+        "skills": [{"id": str(skill.id), "name": skill.name} for skill in current_user.skills] if current_user.skills else [],
         "helped_count": current_user.helped_count
     }
 
@@ -56,7 +56,7 @@ def update_user_me(
         "name": current_user.name,
         "title": current_user.title,
         "company": current_user.company,
-        "skills": [skill.name for skill in current_user.skills] if current_user.skills else [],
+        "skills": [{"id": str(skill.id), "name": skill.name} for skill in current_user.skills] if current_user.skills else [],
         "helped_count": current_user.helped_count
     }
 
@@ -121,7 +121,7 @@ def read_users(
             "name": user.name,
             "title": user.title,
             "company": user.company,
-            "skills": [skill.name for skill in user.skills] if user.skills else [],
+            "skills": [{"id": str(skill.id), "name": skill.name} for skill in user.skills] if user.skills else [],
             "helped_count": user.helped_count
         }
         for user in filtered_users

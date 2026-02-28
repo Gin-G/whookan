@@ -21,7 +21,10 @@ class HelpRequestInDB(HelpRequestBase):
     id: UUID
     requester_id: UUID
     created_at: datetime = Field(default_factory=datetime.now)
-    status: str = "open"  # open, assigned, completed
+    status: str = "open"  # open, in_progress, completed, cancelled
+
+    class Config:
+        orm_mode = True
 
 
 class HelpRequest(HelpRequestInDB):

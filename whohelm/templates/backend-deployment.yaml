@@ -22,7 +22,10 @@ spec:
         - containerPort: 8000
         env:
         - name: SECRET_KEY
-          value: "your-secret-key-value"
+          valueFrom:
+            secretKeyRef:
+              name: whokan-secret-key
+              key: SECRET_KEY
         - name: POSTGRES_HOST
           value: "{{ .Values.db.name }}-rw"
         - name: POSTGRES_DB

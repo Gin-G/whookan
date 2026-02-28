@@ -45,17 +45,17 @@ class Skill(Base):
 
 class HelpRequest(Base):
     __tablename__ = "help_requests"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    title = Column(String, nullable=False)
+    skill_id = Column(UUID(as_uuid=True), ForeignKey('skills.id'), nullable=False)
     description = Column(Text)
-    skill_needed = Column(String, nullable=False)
     status = Column(String, default="open")  # open, in_progress, completed, cancelled
     requester_id = Column(UUID(as_uuid=True), ForeignKey('app_users.id'), nullable=False)
     helper_id = Column(UUID(as_uuid=True), ForeignKey('app_users.id'), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    
+
     # Relationships
     requester = relationship("User", foreign_keys=[requester_id], back_populates="help_requests_created")
     helper = relationship("User", foreign_keys=[helper_id], back_populates="help_requests_helping")
+    skill = relationship("Skill")
