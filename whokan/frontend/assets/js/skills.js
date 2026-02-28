@@ -124,17 +124,21 @@ function renderSkillsList(skills) {
     
     skills.forEach(skill => {
         const skillElement = document.createElement('div');
-        skillElement.className = 'bg-blue-100 px-3 py-1 rounded-full flex items-center mb-2 mr-2 inline-block';
+        skillElement.className = 'bg-blue-100 px-3 py-1 rounded-full flex items-center mb-2 mr-2 inline-flex gap-1';
+        const forumUrl = `/forum.html?skill_id=${encodeURIComponent(skill.id)}&skill_name=${encodeURIComponent(skill.name)}`;
+        const chatUrl = `/chat.html?skill_id=${encodeURIComponent(skill.id)}&skill_name=${encodeURIComponent(skill.name)}`;
         skillElement.innerHTML = `
             <span class="text-blue-800 text-sm">${skill.name}</span>
-            <button type="button" class="ml-2 text-blue-500 hover:text-blue-700" data-skill-id="${skill.id}">
+            <a href="${forumUrl}" title="Forum" class="ml-1 text-blue-500 hover:text-blue-700 text-xs">📋</a>
+            <a href="${chatUrl}" title="Chat" class="text-blue-500 hover:text-blue-700 text-xs">💬</a>
+            <button type="button" class="ml-1 text-blue-500 hover:text-blue-700" data-skill-id="${skill.id}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
         `;
         skillsList.appendChild(skillElement);
-        
+
         // Add event listener to remove button
         const removeButton = skillElement.querySelector('button');
         removeButton.addEventListener('click', () => removeSkill(skill.id));

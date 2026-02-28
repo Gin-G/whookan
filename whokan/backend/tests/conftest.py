@@ -45,6 +45,10 @@ def clean_db():
     """Truncate all tables before every test so each test starts fresh."""
     db = _SessionLocal()
     try:
+        db.execute(text("DELETE FROM chat_messages"))
+        db.execute(text("DELETE FROM post_votes"))
+        db.execute(text("DELETE FROM post_comments"))
+        db.execute(text("DELETE FROM forum_posts"))
         db.execute(text("DELETE FROM help_requests"))
         db.execute(text("DELETE FROM user_skills"))
         db.execute(text("DELETE FROM app_users"))

@@ -80,9 +80,15 @@ function renderSearchResults(users) {
                 </div>
                 <p class="text-sm text-gray-500">${user.title || 'No title'} · ${user.company || 'No company'}</p>
                 <div class="mt-2 flex flex-wrap gap-1">
-                    ${user.skills.map(skill => 
-                        `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" data-skill-id="${skill.id}">${skill.name}</span>`
-                    ).join('')}
+                    ${user.skills.map(skill => {
+                        const forumUrl = `/forum.html?skill_id=${encodeURIComponent(skill.id)}&skill_name=${encodeURIComponent(skill.name)}`;
+                        const chatUrl = `/chat.html?skill_id=${encodeURIComponent(skill.id)}&skill_name=${encodeURIComponent(skill.name)}`;
+                        return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" data-skill-id="${skill.id}">
+                            ${skill.name}
+                            <a href="${forumUrl}" title="Forum" class="text-blue-500 hover:text-blue-700">📋</a>
+                            <a href="${chatUrl}" title="Chat" class="text-blue-500 hover:text-blue-700">💬</a>
+                        </span>`;
+                    }).join('')}
                 </div>
             </div>
             <div class="ml-2">

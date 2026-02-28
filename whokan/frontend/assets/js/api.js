@@ -221,6 +221,42 @@ class ApiService {
     async confirmHelp(confirmationData) {
         return this.request('/help-requests/confirm', 'POST', confirmationData);
     }
+
+    // -----------------------------------------------------------------------
+    // Forum
+    // -----------------------------------------------------------------------
+
+    async getForumInfo(skillId) {
+        return this.request(`/skills/${skillId}/forum/info`);
+    }
+
+    async getForumPosts(skillId) {
+        return this.request(`/skills/${skillId}/forum`);
+    }
+
+    async createForumPost(skillId, postData) {
+        return this.request(`/skills/${skillId}/forum`, 'POST', postData);
+    }
+
+    async getForumPost(skillId, postId) {
+        return this.request(`/skills/${skillId}/forum/${postId}`);
+    }
+
+    async addForumComment(skillId, postId, commentData) {
+        return this.request(`/skills/${skillId}/forum/${postId}/comments`, 'POST', commentData);
+    }
+
+    async voteForumPost(skillId, postId) {
+        return this.request(`/skills/${skillId}/forum/${postId}/vote`, 'POST');
+    }
+
+    // -----------------------------------------------------------------------
+    // Chat history (REST)
+    // -----------------------------------------------------------------------
+
+    async getChatHistory(skillId) {
+        return this.request(`/skills/${skillId}/chat/history`);
+    }
 }
 
 // Export the API service

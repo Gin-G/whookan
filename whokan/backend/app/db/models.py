@@ -59,3 +59,64 @@ class HelpRequest(Base):
     requester = relationship("User", foreign_keys=[requester_id], back_populates="help_requests_created")
     helper = relationship("User", foreign_keys=[helper_id], back_populates="help_requests_helping")
     skill = relationship("Skill")
+
+
+# ---------------------------------------------------------------------------
+# Forum
+# ---------------------------------------------------------------------------
+
+class ForumPost(Base):
+    __tablename__ = "forum_posts"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    skill_id = Column(UUID(as_uuid=True), ForeignKey("skills.id"), nullable=False)
+    author_id = Column(UUID(as_uuid=True), ForeignKey("app_users.id"), nullable=False)
+    title = Column(String, nullable=False)
+    body = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    skill = relationship("Skill")
+    author = relationship("User")
+    comments = relationship("PostComment", back_populates="post", cascade="all, delete-orphan")
+    votes = relationship("PostVote", back_populates="post", cascade="all, delete-orphan")
+
+
+class PostComment(Base):
+    __tablename__ = "post_comments"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    post_id = Column(UUID(as_uuid=True), ForeignKey("forum_posts.id"), nullable=False)
+    author_id = Column(UUID(as_uuid=True), ForeignKey("app_users.id"), nullable=False)
+    body = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    post = relationship("ForumPost", back_populates="comments")
+    author = relationship("User")
+
+
+class PostVote(Base):
+    __tablename__ = "post_votes"
+
+    user_id = Column(UUID(as_uuid=True), ForeignKey("app_users.id"), primary_key=True)
+    post_id = Column(UUID(as_uuid=True), ForeignKey("forum_posts.id"), primary_key=True)
+
+    post = relationship("ForumPost", back_populates="votes")
+    user = relationship("User")
+
+
+# ---------------------------------------------------------------------------
+# Chat
+# ---------------------------------------------------------------------------
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    skill_id = Column(UUID(as_uuid=True), ForeignKey("skills.id"), nullable=False)
+    author_id = Column(UUID(as_uuid=True), ForeignKey("app_users.id"), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    skill = relationship("Skill")
+    author = relationship("User")

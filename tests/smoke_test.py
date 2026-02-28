@@ -135,8 +135,8 @@ def check_get_profile(token: str) -> None:
         record("get_profile", False, str(exc))
 
 
-def check_add_skill(token: str) -> None:
-    """POST /users/me/skills adds a skill to the profile."""
+def check_add_skill(token: str) -> str | None:
+    """POST /users/me/skills adds a skill to the profile; returns skill_id."""
     try:
         r = requests.post(
             f"{API}/users/me/skills",
@@ -144,10 +144,18 @@ def check_add_skill(token: str) -> None:
             headers={"Authorization": f"Bearer {token}"},
             timeout=10,
         )
-        ok = r.status_code == 200 and "SmokeTestSkill" in r.json().get("skills", [])
+        skills = r.json().get("skills", [])
+        skill_names = [s["name"] if isinstance(s, dict) else s for s in skills]
+        ok = r.status_code == 200 and "SmokeTestSkill" in skill_names
         record("add_skill", ok, r.text[:120])
+        if ok:
+            for s in skills:
+                if isinstance(s, dict) and s.get("name") == "SmokeTestSkill":
+                    return s.get("id")
+        return None
     except Exception as exc:
         record("add_skill", False, str(exc))
+        return None
 
 
 def check_search_users(token: str) -> None:
@@ -176,6 +184,51 @@ def check_list_help_requests(token: str) -> None:
         record("list_help_requests", ok, r.text[:120])
     except Exception as exc:
         record("list_help_requests", False, str(exc))
+
+
+def check_forum(token: str, skill_id: str) -> None:
+    """Forum: create post, list posts, post detail."""
+    headers = {"Authorization": f"Bearer {token}"}
+    try:
+        # Create a post
+        r = requests.post(
+            f"{API}/skills/{skill_id}/forum",
+            json={"title": "Smoke test post", "body": "CI smoke test body"},
+            headers=headers,
+            timeout=10,
+        )
+        ok = r.status_code == 200 and "id" in r.json()
+        record("forum_create_post", ok, r.text[:120])
+        if not ok:
+            return
+        post_id = r.json()["id"]
+
+        # List posts
+        r = requests.get(f"{API}/skills/{skill_id}/forum", headers=headers, timeout=10)
+        ok = r.status_code == 200 and len(r.json()) >= 1
+        record("forum_list_posts", ok, r.text[:120])
+
+        # Get post detail
+        r = requests.get(f"{API}/skills/{skill_id}/forum/{post_id}", headers=headers, timeout=10)
+        ok = r.status_code == 200 and "comments" in r.json()
+        record("forum_get_post", ok, r.text[:120])
+    except Exception as exc:
+        record("forum_create_post", False, str(exc))
+
+
+def check_chat_history(token: str, skill_id: str) -> None:
+    """Chat: GET history endpoint returns expected shape."""
+    headers = {"Authorization": f"Bearer {token}"}
+    try:
+        r = requests.get(
+            f"{API}/skills/{skill_id}/chat/history",
+            headers=headers,
+            timeout=10,
+        )
+        ok = r.status_code == 200 and "messages" in r.json()
+        record("chat_history", ok, r.text[:120])
+    except Exception as exc:
+        record("chat_history", False, str(exc))
 
 
 def check_frontend_reachable() -> None:
@@ -209,11 +262,18 @@ def main() -> int:
     token, _ = check_register_and_login()
     if token:
         check_get_profile(token)
-        check_add_skill(token)
+        skill_id = check_add_skill(token)
         check_search_users(token)
         check_list_help_requests(token)
+        if skill_id:
+            check_forum(token, skill_id)
+            check_chat_history(token, skill_id)
+        else:
+            for name in ("forum_create_post", "forum_list_posts", "forum_get_post", "chat_history"):
+                record(name, False, "skipped – no skill_id")
     else:
-        for name in ("get_profile", "add_skill", "search_users_by_skill", "list_help_requests"):
+        for name in ("get_profile", "add_skill", "search_users_by_skill", "list_help_requests",
+                     "forum_create_post", "forum_list_posts", "forum_get_post", "chat_history"):
             record(name, False, "skipped – login failed")
 
     log(f"\n{'='*60}")
