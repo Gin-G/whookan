@@ -6,7 +6,7 @@ app:
 backend:
   image: docker.io/ncging/whokan-backend:2026-03-01.18.51
 frontend:
-  image: docker.io/ncging/whokan-frontend:2026-03-01.16.43
+  image: docker.io/ncging/whokan-frontend:2026-03-01.22.24
 redis:
   image: redis:7-alpine
 db:
