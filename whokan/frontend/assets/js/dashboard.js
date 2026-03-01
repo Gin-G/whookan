@@ -54,10 +54,14 @@ function renderDashboardSkills(skills) {
     }
     
     skills.forEach(skill => {
+        const forumUrl = `/forum.html?skill_id=${encodeURIComponent(skill.id)}&skill_name=${encodeURIComponent(skill.name)}`;
+        const chatUrl = `/chat.html?skill_id=${encodeURIComponent(skill.id)}&skill_name=${encodeURIComponent(skill.name)}`;
         const skillElement = document.createElement('div');
-        skillElement.className = 'bg-blue-100 px-3 py-1 rounded-full flex items-center mb-2 mr-2 inline-block';
+        skillElement.className = 'bg-blue-100 px-3 py-1 rounded-full flex items-center mb-2 mr-2 inline-flex gap-1';
         skillElement.innerHTML = `
             <span class="text-blue-800 text-sm">${skill.name}</span>
+            <a href="${forumUrl}" title="Forum" class="ml-1 text-blue-500 hover:text-blue-700 text-xs">📋</a>
+            <a href="${chatUrl}" title="Chat" class="text-blue-500 hover:text-blue-700 text-xs">💬</a>
         `;
         skillsList.appendChild(skillElement);
     });
