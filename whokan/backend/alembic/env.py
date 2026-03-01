@@ -19,8 +19,16 @@ if config.config_file_name is not None:
 from app.db.models import Base
 target_metadata = Base.metadata
 
-# Override sqlalchemy.url with the DATABASE_URL env var
+# Override sqlalchemy.url — prefer DATABASE_URL, fall back to individual components
 database_url = os.environ.get("DATABASE_URL", "")
+if not database_url:
+    pg_user = os.environ.get("POSTGRES_USER", "")
+    pg_password = os.environ.get("POSTGRES_PASSWORD", "")
+    pg_host = os.environ.get("POSTGRES_HOST", "")
+    pg_port = os.environ.get("POSTGRES_PORT", "5432")
+    pg_db = os.environ.get("POSTGRES_DB", "")
+    if all([pg_user, pg_host, pg_db]):
+        database_url = f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_db}"
 if database_url:
     config.set_main_option("sqlalchemy.url", database_url)
 
