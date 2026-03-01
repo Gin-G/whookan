@@ -83,6 +83,32 @@ def test_list_posts_unauthorized_returns_401(client, skill_uuid):
     assert client.get(f"/api/v1/skills/{skill_uuid}/forum").status_code == 401
 
 
+def test_list_posts_pagination_limit(client, auth_headers, skill_uuid):
+    # Create 3 posts
+    for i in range(3):
+        client.post(
+            f"/api/v1/skills/{skill_uuid}/forum",
+            json={"title": f"Post {i}", "body": "Content"},
+            headers=auth_headers,
+        )
+    resp = client.get(f"/api/v1/skills/{skill_uuid}/forum?limit=2", headers=auth_headers)
+    assert resp.status_code == 200
+    assert len(resp.json()) == 2
+
+
+def test_list_posts_pagination_offset(client, auth_headers, skill_uuid):
+    # Create 3 posts
+    for i in range(3):
+        client.post(
+            f"/api/v1/skills/{skill_uuid}/forum",
+            json={"title": f"Post {i}", "body": "Content"},
+            headers=auth_headers,
+        )
+    resp = client.get(f"/api/v1/skills/{skill_uuid}/forum?limit=2&offset=2", headers=auth_headers)
+    assert resp.status_code == 200
+    assert len(resp.json()) == 1
+
+
 # ---------------------------------------------------------------------------
 # Create post  POST ""
 # ---------------------------------------------------------------------------

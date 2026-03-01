@@ -1,11 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
 from uuid import UUID
 from datetime import datetime
 
 
 class PostCommentCreate(BaseModel):
-    body: str
+    body: str = Field(..., min_length=1, max_length=2000)
 
 
 class PostCommentResponse(BaseModel):
@@ -18,8 +18,8 @@ class PostCommentResponse(BaseModel):
 
 
 class ForumPostCreate(BaseModel):
-    title: str
-    body: str
+    title: str = Field(..., min_length=1, max_length=200)
+    body: str = Field(..., min_length=1, max_length=10000)
 
 
 class ForumPostSummary(BaseModel):

@@ -76,12 +76,16 @@ def list_posts(
     skill_id: UUID,
     current_user: UserModel = Depends(get_current_user),
     db: Session = Depends(get_db),
+    limit: int = 50,
+    offset: int = 0,
 ) -> Any:
     _get_skill_or_404(skill_id, db)
     posts = (
         db.query(ForumPost)
         .filter(ForumPost.skill_id == skill_id)
         .order_by(ForumPost.created_at.desc())
+        .offset(offset)
+        .limit(limit)
         .all()
     )
     return [_serialize_post(p, current_user.id) for p in posts]

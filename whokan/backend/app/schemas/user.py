@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import List, Optional
 from uuid import UUID
 
@@ -7,9 +7,9 @@ from app.schemas.skill import Skill
 
 class UserBase(BaseModel):
     email: EmailStr
-    name: str
-    title: Optional[str] = None
-    company: Optional[str] = None
+    name: str = Field(..., min_length=1, max_length=100)
+    title: Optional[str] = Field(None, max_length=200)
+    company: Optional[str] = Field(None, max_length=200)
 
 
 class UserCreate(UserBase):
@@ -17,9 +17,9 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(BaseModel):
-    name: Optional[str] = None
-    title: Optional[str] = None
-    company: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    title: Optional[str] = Field(None, max_length=200)
+    company: Optional[str] = Field(None, max_length=200)
 
 
 class UserInDBBase(UserBase):

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whokan-redis
+  labels:
+    app: whokan-redis
+    group: {{ .Values.app.group }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: whokan-redis
+  template:
+    metadata:
+      labels:
+        app: whokan-redis
+    spec:
+      containers:
+      - name: redis
+        image: {{ .Values.redis.image }}
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"

@@ -210,3 +210,14 @@ def test_user_list_response_has_expected_fields(
     user = next(u for u in resp.json() if u["email"] == "second@example.com")
     for field in ("id", "email", "name", "title", "company", "skills", "helped_count"):
         assert field in user
+
+
+def test_register_returns_skills_as_objects(client, auth_headers):
+    """Registration endpoint should return skills as [{id, name}] objects, not strings."""
+    client.post("/api/v1/users/me/skills", json={"name": "Rust"}, headers=auth_headers)
+    resp = client.get("/api/v1/users/me", headers=auth_headers)
+    skills = resp.json()["skills"]
+    assert len(skills) == 1
+    assert "id" in skills[0]
+    assert "name" in skills[0]
+    assert skills[0]["name"] == "Rust"

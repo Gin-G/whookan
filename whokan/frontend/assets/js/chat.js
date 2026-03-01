@@ -4,7 +4,10 @@ const params = new URLSearchParams(window.location.search);
 const SKILL_ID = params.get('skill_id');
 const SKILL_NAME = params.get('skill_name') || 'Skill Chat';
 
+const HISTORY_PAGE = 50;
 let ws = null;
+let historyOffset = 0;
+let allHistoryLoaded = false;
 
 // ---------------------------------------------------------------------------
 // Boot
@@ -25,6 +28,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('forum-link').href = forumUrl;
 
     document.getElementById('chat-form').addEventListener('submit', handleSend);
+
+    // Load earlier messages button
+    const loadEarlierBtn = document.getElementById('load-earlier-btn');
+    if (loadEarlierBtn) {
+        loadEarlierBtn.addEventListener('click', loadEarlierMessages);
+    }
 
     connect();
 });
@@ -85,19 +94,40 @@ function handleSend(event) {
 }
 
 // ---------------------------------------------------------------------------
+// Load earlier messages (history pagination)
+// ---------------------------------------------------------------------------
+
+async function loadEarlierMessages() {
+    if (allHistoryLoaded) return;
+    historyOffset += HISTORY_PAGE;
+    try {
+        const data = await api.getChatHistory(SKILL_ID, historyOffset);
+        const msgs = data.messages || [];
+        if (msgs.length < HISTORY_PAGE) {
+            allHistoryLoaded = true;
+            const btn = document.getElementById('load-earlier-btn');
+            if (btn) btn.classList.add('hidden');
+        }
+        const container = document.getElementById('messages-container');
+        const firstChild = container.firstChild;
+        msgs.reverse().forEach(msg => {
+            const div = _createMessageDiv({ ...msg, type: 'history' });
+            container.insertBefore(div, firstChild);
+        });
+    } catch (err) {
+        console.error('Error loading earlier messages:', err);
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Render messages
 // ---------------------------------------------------------------------------
 
-function appendMessage(data) {
-    const container = document.getElementById('messages-container');
-    const placeholder = document.getElementById('messages-placeholder');
-    if (placeholder) placeholder.remove();
-
+function _createMessageDiv(data) {
     const div = document.createElement('div');
     div.className = data.type === 'history'
         ? 'flex flex-col opacity-70'
         : 'flex flex-col';
-
     div.innerHTML = `
         <div class="flex items-baseline gap-2">
             <span class="text-xs font-semibold text-indigo-700">${escapeHtml(data.author_name)}</span>
@@ -105,8 +135,15 @@ function appendMessage(data) {
         </div>
         <p class="text-sm text-gray-800 mt-0.5">${escapeHtml(data.content)}</p>
     `;
+    return div;
+}
 
-    container.appendChild(div);
+function appendMessage(data) {
+    const container = document.getElementById('messages-container');
+    const placeholder = document.getElementById('messages-placeholder');
+    if (placeholder) placeholder.remove();
+
+    container.appendChild(_createMessageDiv(data));
     container.scrollTop = container.scrollHeight;
 }
 

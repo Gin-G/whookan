@@ -230,8 +230,8 @@ class ApiService {
         return this.request(`/skills/${skillId}/forum/info`);
     }
 
-    async getForumPosts(skillId) {
-        return this.request(`/skills/${skillId}/forum`);
+    async getForumPosts(skillId, limit = 50, offset = 0) {
+        return this.request(`/skills/${skillId}/forum?limit=${limit}&offset=${offset}`);
     }
 
     async createForumPost(skillId, postData) {
@@ -254,8 +254,8 @@ class ApiService {
     // Chat history (REST)
     // -----------------------------------------------------------------------
 
-    async getChatHistory(skillId) {
-        return this.request(`/skills/${skillId}/chat/history`);
+    async getChatHistory(skillId, offset = 0) {
+        return this.request(`/skills/${skillId}/chat/history?offset=${offset}`);
     }
 }
 

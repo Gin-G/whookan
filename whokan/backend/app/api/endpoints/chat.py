@@ -1,6 +1,9 @@
 """Chat endpoints — one real-time chat room per skill, Discord-style."""
 from typing import Any, List
 from uuid import UUID, uuid4
+import asyncio
+import json
+import os
 
 import jwt
 from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect
@@ -15,9 +18,12 @@ from app.db.session import get_user_by_email
 from app.deps import get_current_user, get_db
 from app.schemas.chat import ChatHistoryResponse, ChatMessageResponse
 
+REDIS_URL = os.environ.get("REDIS_URL", "")
+
 router = APIRouter()
 
 HISTORY_LIMIT = 50
+MAX_CONTENT_LENGTH = 1000
 
 
 # ---------------------------------------------------------------------------
@@ -67,6 +73,7 @@ def _serialize_message(msg: ChatMessage) -> dict:
 @router.get("/history", response_model=ChatHistoryResponse)
 def get_chat_history(
     skill_id: UUID,
+    offset: int = 0,
     current_user: UserModel = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> Any:
@@ -78,19 +85,119 @@ def get_chat_history(
     messages = (
         db.query(ChatMessage)
         .filter(ChatMessage.skill_id == skill_id)
-        .order_by(ChatMessage.created_at.asc())
+        .order_by(ChatMessage.created_at.desc())
+        .offset(offset)
         .limit(HISTORY_LIMIT)
         .all()
     )
     return {
         "skill_id": skill_id,
-        "messages": [_serialize_message(m) for m in messages],
+        "messages": [_serialize_message(m) for m in reversed(messages)],
     }
 
 
 # ---------------------------------------------------------------------------
 # WS /api/v1/skills/{skill_id}/chat/ws?token=<jwt>
 # ---------------------------------------------------------------------------
+
+async def _ws_local(websocket: WebSocket, skill_id: UUID, skill_id_str: str, user, db) -> None:
+    """Single-replica WebSocket handler using in-memory manager."""
+    await manager.connect(websocket, skill_id_str)
+
+    # Send recent history (most recent 50, oldest first)
+    messages = (
+        db.query(ChatMessage)
+        .filter(ChatMessage.skill_id == skill_id)
+        .order_by(ChatMessage.created_at.desc())
+        .limit(HISTORY_LIMIT)
+        .all()
+    )
+    for msg in reversed(messages):
+        await websocket.send_json({"type": "history", **_serialize_message(msg)})
+
+    try:
+        while True:
+            content = await websocket.receive_text()
+            content = content.strip()
+            if not content or len(content) > MAX_CONTENT_LENGTH:
+                continue
+
+            msg = ChatMessage(
+                id=uuid4(),
+                skill_id=skill_id,
+                author_id=user.id,
+                content=content,
+            )
+            db.add(msg)
+            db.commit()
+            db.refresh(msg)
+
+            payload_out = {"type": "message", **_serialize_message(msg)}
+            await manager.broadcast(payload_out, skill_id_str)
+
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, skill_id_str)
+
+
+async def _ws_with_redis(websocket: WebSocket, skill_id: UUID, skill_id_str: str, user, db) -> None:
+    """Multi-replica WebSocket handler using Redis pub/sub for cross-pod broadcast."""
+    import redis.asyncio as aioredis
+
+    await websocket.accept()
+
+    # Send recent history (most recent 50, oldest first)
+    messages = (
+        db.query(ChatMessage)
+        .filter(ChatMessage.skill_id == skill_id)
+        .order_by(ChatMessage.created_at.desc())
+        .limit(HISTORY_LIMIT)
+        .all()
+    )
+    for msg in reversed(messages):
+        await websocket.send_json({"type": "history", **_serialize_message(msg)})
+
+    r = aioredis.from_url(REDIS_URL)
+    pubsub = r.pubsub()
+    channel = f"skill:{skill_id_str}"
+    await pubsub.subscribe(channel)
+
+    async def redis_listener() -> None:
+        async for message in pubsub.listen():
+            if message["type"] == "message":
+                try:
+                    await websocket.send_json(json.loads(message["data"]))
+                except Exception:
+                    break
+
+    listener_task = asyncio.create_task(redis_listener())
+
+    try:
+        while True:
+            content = await websocket.receive_text()
+            content = content.strip()
+            if not content or len(content) > MAX_CONTENT_LENGTH:
+                continue
+
+            msg = ChatMessage(
+                id=uuid4(),
+                skill_id=skill_id,
+                author_id=user.id,
+                content=content,
+            )
+            db.add(msg)
+            db.commit()
+            db.refresh(msg)
+
+            payload_out = {"type": "message", **_serialize_message(msg)}
+            await r.publish(channel, json.dumps(payload_out))
+
+    except WebSocketDisconnect:
+        pass
+    finally:
+        listener_task.cancel()
+        await pubsub.unsubscribe(channel)
+        await r.aclose()
+
 
 @router.websocket("/ws")
 async def websocket_chat(
@@ -114,40 +221,9 @@ async def websocket_chat(
         return
 
     skill_id_str = str(skill_id)
-    await manager.connect(websocket, skill_id_str)
+    if REDIS_URL:
+        await _ws_with_redis(websocket, skill_id, skill_id_str, user, db)
+    else:
+        await _ws_local(websocket, skill_id, skill_id_str, user, db)
 
-    # Send recent history to the newly connected client
-    messages = (
-        db.query(ChatMessage)
-        .filter(ChatMessage.skill_id == skill_id)
-        .order_by(ChatMessage.created_at.asc())
-        .limit(HISTORY_LIMIT)
-        .all()
-    )
-    for msg in messages:
-        await websocket.send_json({"type": "history", **_serialize_message(msg)})
-
-    try:
-        while True:
-            content = await websocket.receive_text()
-            content = content.strip()
-            if not content:
-                continue
-
-            msg = ChatMessage(
-                id=uuid4(),
-                skill_id=skill_id,
-                author_id=user.id,
-                content=content,
-            )
-            db.add(msg)
-            db.commit()
-            db.refresh(msg)
-
-            payload_out = {"type": "message", **_serialize_message(msg)}
-            await manager.broadcast(payload_out, skill_id_str)
-
-    except WebSocketDisconnect:
-        manager.disconnect(websocket, skill_id_str)
-    finally:
-        db.close()
+    db.close()

@@ -15,9 +15,22 @@ from app.schemas.user import User as UserSchema
 router = APIRouter()
 
 
+def _serialize_request(r: HelpRequestModel) -> dict:
+    return {
+        "id": str(r.id),
+        "skill_id": str(r.skill_id),
+        "requester_id": str(r.requester_id),
+        "description": r.description,
+        "created_at": r.created_at,
+        "status": r.status,
+        "requester_name": r.requester.name if r.requester else "",
+        "skill_name": r.skill.name if r.skill else "",
+    }
+
+
 @router.post("", response_model=HelpRequest)
 def create_help_request(
-    help_request_in: HelpRequestCreate, 
+    help_request_in: HelpRequestCreate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ) -> Any:
@@ -31,12 +44,12 @@ def create_help_request(
         description=help_request_in.description,
         status="open"  # Set default status
     )
-    
+
     db.add(help_request)
     db.commit()
     db.refresh(help_request)
-    
-    return help_request
+
+    return _serialize_request(help_request)
 
 
 @router.get("", response_model=List[HelpRequest])
@@ -52,8 +65,8 @@ def read_help_requests(
         HelpRequestModel.status == "open",
         HelpRequestModel.requester_id != current_user.id
     ).all()
-    
-    return help_requests
+
+    return [_serialize_request(r) for r in help_requests]
 
 
 @router.post("/confirm", response_model=UserSchema)

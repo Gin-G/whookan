@@ -51,6 +51,8 @@ def test_create_help_request_response_fields(client, second_auth_headers, regist
     assert "requester_id" in data
     assert data["skill_id"] == skill_uuid
     assert data["description"] == "Need asyncio help"
+    assert data["requester_name"] == "Second User"
+    assert data["skill_name"] == "Python"
 
 
 def test_create_help_request_status_defaults_to_open(client, second_auth_headers, registered_second_user, skill_uuid):
@@ -113,7 +115,10 @@ def test_list_help_requests_shows_other_users_requests(
     # First user can see it
     resp = client.get("/api/v1/help-requests", headers=auth_headers)
     assert len(resp.json()) == 1
-    assert resp.json()[0]["description"] == "Need help"
+    data = resp.json()[0]
+    assert data["description"] == "Need help"
+    assert data["requester_name"] == "Second User"
+    assert data["skill_name"] == "Python"
 
 
 def test_list_help_requests_excludes_own_requests(

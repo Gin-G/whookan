@@ -1,11 +1,15 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, validator
 from typing import Optional
 from uuid import UUID
 
 
 class SkillBase(BaseModel):
-    name: str
+    name: str = Field(..., min_length=1, max_length=100)
     description: Optional[str] = None
+
+    @validator("name", pre=True)
+    def strip_whitespace(cls, v: str) -> str:
+        return v.strip()
 
 
 class SkillCreate(SkillBase):

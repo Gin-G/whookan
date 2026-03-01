@@ -86,31 +86,17 @@ async function fetchHelpRequests() {
         requestsList.classList.remove('hidden');
         requestsList.innerHTML = '';
         
-        // Build cache of users and skills for display
-        const usersCache = {};
-        const skillsCache = {};
-        
         // Get current user for help button functionality
         const currentUser = getCurrentUser();
-        
+
         // Populate the list with requests
         requests.forEach(request => {
             const requestItem = document.createElement('li');
             requestItem.className = 'py-4 flex animate-fadeIn';
-            
-            let requesterName = 'Unknown User';
-            let skillName = 'Unknown Skill';
-            
-            // Attempt to get requester name
-            if (usersCache[request.requester_id]) {
-                requesterName = usersCache[request.requester_id].name;
-            }
-            
-            // Attempt to get skill name
-            if (skillsCache[request.skill_id]) {
-                skillName = skillsCache[request.skill_id].name;
-            }
-            
+
+            const requesterName = request.requester_name || 'Unknown User';
+            const skillName = request.skill_name || 'Unknown Skill';
+
             requestItem.innerHTML = `
                 <div class="ml-3 flex-1">
                     <p class="text-sm font-medium text-gray-900">${skillName}</p>
@@ -123,17 +109,8 @@ async function fetchHelpRequests() {
                     </button>
                 </div>
             `;
-            
+
             requestsList.appendChild(requestItem);
-            
-            // Fetch user and skill info if not in cache
-            if (!usersCache[request.requester_id]) {
-                fetchUserInfo(request.requester_id, usersCache, requestItem);
-            }
-            
-            if (!skillsCache[request.skill_id]) {
-                fetchSkillInfo(request.skill_id, skillsCache, requestItem);
-            }
         });
         
         // Add event listeners to help buttons
@@ -153,46 +130,6 @@ async function fetchHelpRequests() {
                 <p>Error loading help requests. Please try again later.</p>
             </div>
         `;
-    }
-}
-
-// Fetch user info for display
-async function fetchUserInfo(userId, cache, element) {
-    try {
-        // This would be an API call in production
-        // For now, just simulate with some example data
-        cache[userId] = {
-            id: userId,
-            name: 'User ' + userId.substring(0, 4)
-        };
-        
-        // Update the element
-        const userElement = element.querySelector(`p:contains("Requested by")`);
-        if (userElement) {
-            userElement.textContent = `Requested by ${cache[userId].name} · ${formatDate(new Date())}`;
-        }
-    } catch (error) {
-        console.error('Error fetching user info:', error);
-    }
-}
-
-// Fetch skill info for display
-async function fetchSkillInfo(skillId, cache, element) {
-    try {
-        // This would be an API call in production
-        // For now, just simulate with some example data
-        cache[skillId] = {
-            id: skillId,
-            name: 'Skill ' + skillId.substring(0, 4)
-        };
-        
-        // Update the element
-        const skillElement = element.querySelector('p.text-sm.font-medium');
-        if (skillElement) {
-            skillElement.textContent = cache[skillId].name;
-        }
-    } catch (error) {
-        console.error('Error fetching skill info:', error);
     }
 }
 

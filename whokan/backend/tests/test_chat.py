@@ -133,3 +133,45 @@ def test_websocket_empty_messages_ignored(client, skill_uuid, token):
         ws.send_text("Real message")
         data = ws.receive_json()
         assert data["content"] == "Real message"
+
+
+def test_get_history_with_offset_param(client, auth_headers, skill_uuid, token):
+    """History endpoint accepts offset param without error."""
+    resp = client.get(
+        f"/api/v1/skills/{skill_uuid}/chat/history?offset=0",
+        headers=auth_headers,
+    )
+    assert resp.status_code == 200
+    assert resp.json()["messages"] == []
+
+
+def test_get_history_ordered_oldest_first(client, auth_headers, skill_uuid, token):
+    """History returns messages in chronological (oldest first) order."""
+    # Send two messages in order
+    with client.websocket_connect(
+        f"/api/v1/skills/{skill_uuid}/chat/ws?token={token}"
+    ) as ws:
+        ws.send_text("First message")
+        ws.receive_json()
+        ws.send_text("Second message")
+        ws.receive_json()
+
+    data = client.get(
+        f"/api/v1/skills/{skill_uuid}/chat/history",
+        headers=auth_headers,
+    ).json()
+    contents = [m["content"] for m in data["messages"]]
+    assert contents == ["First message", "Second message"]
+
+
+def test_websocket_long_message_ignored(client, skill_uuid, token):
+    """Messages over 1000 chars are dropped silently."""
+    long_msg = "x" * 1001
+    with client.websocket_connect(
+        f"/api/v1/skills/{skill_uuid}/chat/ws?token={token}"
+    ) as ws:
+        ws.send_text(long_msg)
+        # Send a short valid message — it should be received (connection alive)
+        ws.send_text("valid")
+        data = ws.receive_json()
+        assert data["content"] == "valid"

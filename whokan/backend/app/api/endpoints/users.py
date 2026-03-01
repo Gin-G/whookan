@@ -91,7 +91,7 @@ def create_user_endpoint(user_in: UserCreate, db: Session = Depends(get_db)) -> 
         "name": user.name,
         "title": user.title,
         "company": user.company,
-        "skills": [skill.name for skill in user.skills] if user.skills else [],
+        "skills": [{"id": str(skill.id), "name": skill.name} for skill in user.skills] if user.skills else [],
         "helped_count": user.helped_count
     }
 

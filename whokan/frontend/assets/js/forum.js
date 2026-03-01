@@ -4,7 +4,10 @@ const params = new URLSearchParams(window.location.search);
 const SKILL_ID = params.get('skill_id');
 const SKILL_NAME = params.get('skill_name') || 'Skill Forum';
 
+const PAGE_SIZE = 50;
 let currentPostId = null;
+let postsOffset = 0;
+let allPostsLoaded = false;
 
 // ---------------------------------------------------------------------------
 // Boot
@@ -51,14 +54,22 @@ document.addEventListener('DOMContentLoaded', () => {
 // Load and render post list
 // ---------------------------------------------------------------------------
 
-async function loadPosts() {
+async function loadPosts(append = false) {
     document.getElementById('posts-loading').classList.remove('hidden');
-    document.getElementById('posts-list').classList.add('hidden');
-    document.getElementById('posts-empty').classList.add('hidden');
+    if (!append) {
+        document.getElementById('posts-list').classList.add('hidden');
+        document.getElementById('posts-empty').classList.add('hidden');
+    }
 
     try {
-        const posts = await api.getForumPosts(SKILL_ID);
-        renderPostList(posts);
+        const posts = await api.getForumPosts(SKILL_ID, PAGE_SIZE, postsOffset);
+        if (append) {
+            appendPostList(posts);
+        } else {
+            renderPostList(posts);
+        }
+        allPostsLoaded = posts.length < PAGE_SIZE;
+        updateLoadMoreButton();
     } catch (err) {
         showError(err.message || 'Failed to load posts.');
     } finally {
@@ -66,7 +77,30 @@ async function loadPosts() {
     }
 }
 
+function _createPostItem(post) {
+    const li = document.createElement('li');
+    li.className = 'px-4 py-4 hover:bg-gray-50 cursor-pointer';
+    li.innerHTML = `
+        <div class="flex items-start justify-between">
+            <div class="flex-1 min-w-0">
+                <h3 class="text-sm font-medium text-gray-900 truncate">${escapeHtml(post.title)}</h3>
+                <p class="text-xs text-gray-500 mt-0.5">
+                    by ${escapeHtml(post.author_name)} · ${formatDate(post.created_at)}
+                </p>
+                <p class="text-sm text-gray-600 mt-1 line-clamp-2">${escapeHtml(post.body)}</p>
+            </div>
+            <div class="ml-4 flex-shrink-0 flex flex-col items-center text-xs text-gray-400 gap-1">
+                <span>▲ ${post.vote_count}</span>
+                <span>💬 ${post.comment_count}</span>
+            </div>
+        </div>
+    `;
+    li.addEventListener('click', () => openPostDetail(post.id));
+    return li;
+}
+
 function renderPostList(posts) {
+    postsOffset = 0;
     const list = document.getElementById('posts-list');
     list.innerHTML = '';
 
@@ -75,29 +109,29 @@ function renderPostList(posts) {
         return;
     }
 
-    posts.forEach(post => {
-        const li = document.createElement('li');
-        li.className = 'px-4 py-4 hover:bg-gray-50 cursor-pointer';
-        li.innerHTML = `
-            <div class="flex items-start justify-between">
-                <div class="flex-1 min-w-0">
-                    <h3 class="text-sm font-medium text-gray-900 truncate">${escapeHtml(post.title)}</h3>
-                    <p class="text-xs text-gray-500 mt-0.5">
-                        by ${escapeHtml(post.author_name)} · ${formatDate(post.created_at)}
-                    </p>
-                    <p class="text-sm text-gray-600 mt-1 line-clamp-2">${escapeHtml(post.body)}</p>
-                </div>
-                <div class="ml-4 flex-shrink-0 flex flex-col items-center text-xs text-gray-400 gap-1">
-                    <span>▲ ${post.vote_count}</span>
-                    <span>💬 ${post.comment_count}</span>
-                </div>
-            </div>
-        `;
-        li.addEventListener('click', () => openPostDetail(post.id));
-        list.appendChild(li);
-    });
-
+    posts.forEach(post => list.appendChild(_createPostItem(post)));
+    postsOffset = posts.length;
     list.classList.remove('hidden');
+}
+
+function appendPostList(posts) {
+    if (!posts || posts.length === 0) return;
+    const list = document.getElementById('posts-list');
+    posts.forEach(post => list.appendChild(_createPostItem(post)));
+    postsOffset += posts.length;
+}
+
+function updateLoadMoreButton() {
+    let btn = document.getElementById('load-more-btn');
+    if (!btn) {
+        btn = document.createElement('button');
+        btn.id = 'load-more-btn';
+        btn.className = 'mt-4 w-full py-2 text-sm text-indigo-600 hover:text-indigo-800 font-medium';
+        btn.textContent = 'Load more';
+        btn.addEventListener('click', () => loadPosts(true));
+        document.getElementById('posts-list').after(btn);
+    }
+    btn.classList.toggle('hidden', allPostsLoaded);
 }
 
 // ---------------------------------------------------------------------------
@@ -156,6 +190,8 @@ function renderComments(comments, count) {
 
 function showPostList() {
     currentPostId = null;
+    postsOffset = 0;
+    allPostsLoaded = false;
     document.getElementById('post-detail').classList.add('hidden');
     document.getElementById('new-post-btn').classList.remove('hidden');
     document.getElementById('chat-link').classList.remove('hidden');

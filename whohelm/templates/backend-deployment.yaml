@@ -44,3 +44,5 @@ spec:
           value: "5432"
         - name: ENVIRONMENT
           value: {{ .Values.environment | default "production" | quote }}
+        - name: REDIS_URL
+          value: "redis://whokan-redis:6379"
