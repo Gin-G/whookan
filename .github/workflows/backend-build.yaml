@@ -133,6 +133,6 @@ jobs:
       - name: Run smoke tests
         env:
           SMOKE_TEST_URL: https://whokan.nickknows.net
-          # Allow up to 5 minutes for Kubernetes to roll out the new pods
-          SMOKE_TIMEOUT: "300"
+          # Allow up to 10 minutes for ArgoCD to sync + Kubernetes to roll out the new pods
+          SMOKE_TIMEOUT: "600"
         run: python tests/smoke_test.py
