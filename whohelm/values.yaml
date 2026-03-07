@@ -4,7 +4,7 @@ app:
   secretKeyPath: whokan
   secretKeyProperty: secret_key_value
 backend:
-  image: docker.io/ncging/whokan-backend:2026-03-01.18.51
+  image: docker.io/ncging/whokan-backend:2026-03-07.02.57
 frontend:
   image: docker.io/ncging/whokan-frontend:2026-03-01.22.24
 redis:
