@@ -1,7 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 import asyncio
 import os
+import traceback
 from sqlalchemy.exc import OperationalError
 
 from app.core.config import settings
@@ -12,6 +14,13 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
+
+@app.exception_handler(Exception)
+async def debug_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={"error": str(exc), "type": type(exc).__name__, "trace": traceback.format_exc()}
+    )
 
 # Set all CORS enabled origins
 if settings.BACKEND_CORS_ORIGINS:
