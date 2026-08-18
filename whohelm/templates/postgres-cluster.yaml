@@ -10,6 +10,11 @@ spec:
   instances: {{ .Values.db.instances }}
   storage:
     size: {{ .Values.db.size }}
+
+  {{- with .Values.db.resources }}
+  resources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
       
   # Enable superuser access
   enableSuperuserAccess: true
